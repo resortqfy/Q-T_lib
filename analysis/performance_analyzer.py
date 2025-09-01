@@ -81,13 +81,22 @@ class PerformanceEvaluator:
         if self.pnls.empty:
             return
 
-        plt.figure(figsize=(10, 6))
+        # 根据交易数量动态调整图表大小
+        num_trades = len(self.pnls)
+        fig_width = max(10, num_trades * 0.1)  # 宽度随交易数量增加，最小为10
+        fig_height = max(6, num_trades * 0.05)  # 高度随交易数量增加，最小为6
+        plt.figure(figsize=(fig_width, fig_height))
         plt.bar(self.pnls['date'], self.pnls['pnl'], color=['green' if x > 0 else 'red' for x in self.pnls['pnl']])
         plt.title('每次交易的盈亏')
         plt.xlabel('日期')
         plt.ylabel('盈亏 (人民币)')
         plt.grid(True)
-        plt.xticks(rotation=45)
+        # 调整日期标签显示，减少拥挤
+        plt.xticks(rotation=45, ha='right')
+        # 根据交易数量调整日期标签的间隔
+        if num_trades > 50:
+            step = num_trades // 10  # 每隔10%的交易数量显示一个标签
+            plt.xticks(self.pnls['date'][::step])
         plt.tight_layout()
         # 确保输出目录存在
         output_dir = os.path.dirname('pnl_per_trade.png')
