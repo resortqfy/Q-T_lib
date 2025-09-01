@@ -149,7 +149,33 @@ python cli.py strategies
 - 注释：每个模块、类和函数都应有详细的文档字符串，说明其功能和参数。
 - 代码结构：模块化设计，每个模块负责特定功能。
 
-更多详情请参考 [Google Python Style Guide](https://zh-google-styleguide.readthedocs.io/en/latest/google-python-styleguide/python_style_rules.html)。
+更多详情请参考 [Google Python Style Guide](https://zh-google-styleguide.readthedocs.io/en/latest/google-python-styleguide/python_style_rules.html).
+
+## 针对 PNL 计算任务的说明
+
+### 任务背景
+
+本项目是为满足以下任务需求而设计的：编写 Python 代码计算交易系统的 PNL（利润和损失）。任务要求指定一个交易策略，并计算指定时间段内的 PNL。数据来源于 `etf_data.xlsx` 文件，交易前后的持仓数据以 CSV 文件形式提供。
+
+### 代码使用方式
+
+1. **运行程序**：通过 `main.py` 或 `cli.py` 运行交易系统，选择策略并生成交易数据和 PNL 计算结果。
+   - 示例命令：`python main.py --strategy momentum --optimize`
+   - 输出文件：`trade_before.csv` 和 `trade_after.csv` 包含交易数据，`results.txt` 和 `detailed_report.txt` 包含 PNL 和绩效报告。
+2. **查看结果**：运行后，查看生成的图表（如 `assets_curve.png`、`pnl_per_trade.png`）和文本报告，了解总资产变化、每次交易的 PNL 以及策略的年化收益率、夏普比率和最大回撤。
+
+### 策略设计的思考逻辑
+
+- **策略选择**：项目实现了三种策略（动量、均值回归、RSI），每种策略基于不同的市场假设。动量策略捕捉趋势，均值回归策略利用价格回归，RSI 策略识别超买超卖状态。用户可根据市场特点选择合适的策略。
+- **参数优化**：通过网格搜索（`optimize_parameters` 函数）测试不同参数组合，选择年化收益率最高的参数，以提高 PNL。
+- **资金管理**：初始资本限制在10万元以内，后续交易金额上限为本金加策略收益，确保资金使用符合任务要求。
+- **交易单位**：最小交易单位设为100股，符合任务规定。
+
+### PNL 计算逻辑
+
+- **数据读取**：从 `etf_data.xlsx` 读取市场数据，从 `trade_before.csv` 和 `trade_after.csv` 读取交易数据。
+- **计算公式**：对于每次交易，计算每个标的的 PNL = (卖出价格 - 买入价格) * 卖出数量，并扣除 0.06% 的交易手续费（交易金额 = 价格 * 数量）。
+- **结果输出**：每次交易的 PNL 记录在 `results.txt` 中，总资产变化曲线和绩效指标通过图表可视化。
 
 ## 贡献指南
 
@@ -169,7 +195,7 @@ python cli.py strategies
 
 ## 联系方式
 
-如果您有任何问题或建议，请通过 GitHub Issues 联系我们，或者发送邮件至 [your-email@example.com]。
+如果您有任何问题或建议，请通过 GitHub Issues 联系我们，或者发送邮件至 [feiyuanqiao52@gmail.com]。
 
 ---
 
