@@ -22,9 +22,12 @@ class TradingStrategy(BaseStrategy):
     def generate_trades(self):
         """Generate trade before and after positions based on momentum."""
         # 计算每个ETF过去指定天数的收益率
-        returns = self.market_data['open'].unstack('code').pct_change(self.lookback_period).shift(-self.lookback_period)
+        returns = self.market_data['open'].unstack('code').pct_change(self.lookback_period)
         # 获取所有交易日期
         trade_dates = returns.index
+        # 确保交易日期不超过市场数据的最新日期
+        max_date = self.market_data.index.get_level_values('date').max()
+        trade_dates = trade_dates[trade_dates <= max_date]
         trades_before = []
         trades_after = []
         current_positions = {}

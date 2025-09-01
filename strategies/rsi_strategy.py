@@ -55,6 +55,9 @@ class RSIStrategy(BaseStrategy):
             rsi_values[code] = self.calculate_rsi(prices[code].values, self.rsi_period)
 
         trade_dates = prices.index
+        # 确保交易日期不超过市场数据的最新日期
+        max_date = self.market_data.index.get_level_values('date').max()
+        trade_dates = trade_dates[trade_dates <= max_date]
         trades_before = []
         trades_after = []
         current_positions = {}
