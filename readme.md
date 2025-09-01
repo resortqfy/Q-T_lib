@@ -164,6 +164,24 @@ python cli.py strategies
    - 输出文件：`trade_before.csv` 和 `trade_after.csv` 包含交易数据，`results.txt` 和 `detailed_report.txt` 包含 PNL 和绩效报告。
 2. **查看结果**：运行后，查看生成的图表（如 `assets_curve.png`、`pnl_per_trade.png`）和文本报告，了解总资产变化、每次交易的 PNL 以及策略的年化收益率、夏普比率和最大回撤。
 
+### 使用 CMake 构建和运行 Windows 可执行文件
+
+为了方便 Windows 用户直接运行 Q-T_lib 项目，我们提供了 CMake 配置，以便将项目打包为可执行文件（`.exe`）。以下是构建和运行步骤：
+
+1. **安装 CMake**：从 [CMake 官方网站](https://cmake.org/download/) 下载并安装 CMake。
+2. **克隆仓库**：如果您还没有克隆仓库，请按照前面的安装指南克隆 Q-T_lib 仓库。
+3. **构建项目**：
+   - 打开命令提示符或 PowerShell，导航到项目目录：`cd D:\Desktop\Q-T_lib`
+   - 创建构建目录并导航到该目录：`mkdir build && cd build`
+   - 运行 CMake 配置：`cmake ..`
+   - 构建项目：`cmake --build . --config Release`
+4. **运行可执行文件**：
+   - 构建完成后，可执行文件 `Q-T_lib.exe` 将位于 `build/bin` 目录下。
+   - 运行：`bin\Q-T_lib.exe --strategy momentum --optimize`
+   - 输出文件和图表将生成在运行目录中。
+
+**注意**：确保 `etf_data.xlsx` 文件位于运行目录中，以便程序能够读取市场数据。
+
 ### 策略设计的思考逻辑
 
 - **策略选择**：项目实现了三种策略（动量、均值回归、RSI），每种策略基于不同的市场假设。动量策略捕捉趋势，均值回归策略利用价格回归，RSI 策略识别超买超卖状态。用户可根据市场特点选择合适的策略。
