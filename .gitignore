@@ -35,7 +35,32 @@ ENV/
 *.csv
 *.xlsx
 *.png
-*.txt
 *.json
 *.spec
+
+# Project specific files
+detailed_report.txt
+results.txt
+
+# Quant Trading specific
+# Data files
+data/
+*.data
+*.db
+
+# Configuration and secrets
+config.ini
+secrets.json
+*.key
+*.pem
+
+# Temporary files and logs
+logs/
+*.log
+*.tmp
+
+# Backtest and optimization results
+results/
+backtest_*.csv
+optimization_*.json
 
