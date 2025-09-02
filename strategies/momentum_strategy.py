@@ -18,6 +18,8 @@ class TradingStrategy(BaseStrategy):
         self.current_capital = initial_capital
         self.lookback_period = lookback_period
         self.top_n = top_n
+        self.first_trade = True
+        self.total_pnl = 0
 
     def generate_trades(self):
         """Generate trade before and after positions based on momentum."""
@@ -50,8 +52,13 @@ class TradingStrategy(BaseStrategy):
             top_performers = ret.nlargest(min(self.top_n, len(ret))).index
             # 计算可用于投资的金额
             available_capital = self.current_capital
+            if self.first_trade:
+                available_capital = min(self.initial_capital, 100000)
+            else:
+                available_capital = self.initial_capital + self.total_pnl
             if available_capital < 0:
                 available_capital = 0
+
             capital_per_etf = available_capital / len(top_performers) if available_capital > 0 and len(top_performers) > 0 else 0
             new_positions = {}
             total_invested = 0
@@ -73,6 +80,7 @@ class TradingStrategy(BaseStrategy):
                     if price > 0:
                         revenue = qty * price
                         self.current_capital += revenue
+                        self.total_pnl += revenue - (qty * price * 0.0006)  # 扣除交易手续费
                         trades_after.append([date.strftime('%Y%m%d'), code, price, 0])
 
             # 买入新的持仓
@@ -81,13 +89,17 @@ class TradingStrategy(BaseStrategy):
                 if price > 0:
                     cost = qty * price
                     self.current_capital -= cost
+                    self.total_pnl -= cost + (cost * 0.0006)  # 扣除交易手续费
                     trades_after.append([date.strftime('%Y%m%d'), code, price, qty])
 
             current_positions = new_positions.copy()
             self.current_capital -= total_invested * 0.0006  # 扣除交易手续费
+            if self.first_trade and total_invested > 0:
+                self.first_trade = False
 
         trades_before_df = pd.DataFrame(trades_before, columns=['交易时间', '标的', '价格', '数量'])
         trades_after_df = pd.DataFrame(trades_after, columns=['交易时间', '标的', '价格', '数量'])
         trades_before_df.to_csv('trade_before.csv', index=False)
         trades_after_df.to_csv('trade_after.csv', index=False)
+
         return trades_before_df, trades_after_df

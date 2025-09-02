@@ -128,7 +128,12 @@ def main(strategy_name='momentum', optimize=False):
     total_assets_history = pd.DataFrame()
     if not pnls.empty:
         total_assets_history['date'] = pd.to_datetime(pnls['date'])
-        total_assets_history['assets'] = TRADING_CONFIG['initial_capital'] + pnls['pnl'].cumsum()
+        # 确保初始资产等于初始资本
+        initial_assets = TRADING_CONFIG['initial_capital']
+        total_assets_history['assets'] = initial_assets + pnls['pnl'].cumsum().shift(1).fillna(0)
+        # 修正第一条记录的资产值为初始资本
+        if not total_assets_history.empty:
+            total_assets_history.loc[0, 'assets'] = initial_assets
     evaluator = PerformanceEvaluator(pnls, total_assets_history)
     annualized_return, sharpe, max_drawdown = evaluator.calculate_metrics()
     evaluator.plot_assets_curve()
