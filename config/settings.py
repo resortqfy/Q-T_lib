@@ -12,6 +12,11 @@ TRADING_CONFIG = {
     'mean_reversion': {
         'window': range(10, 30, 5),  # 均值回归策略窗口大小范围
         'threshold': [1.5, 2.0, 2.5],  # 均值回归策略阈值范围
+    },
+    'rsi': {
+        'rsi_period': range(10, 20, 2),
+        'rsi_overbought': range(60, 80, 5),
+        'rsi_oversold': range(20, 40, 5),
     }
 }
 

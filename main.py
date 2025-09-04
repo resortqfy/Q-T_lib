@@ -39,10 +39,10 @@ def optimize_parameters(strategy_name, market_data):
             pnls = calculator.calculate_pnl()
             total_assets_history = pd.DataFrame()
             if not pnls.empty:
-                total_assets_history['date'] = pd.to_datetime(pnls['date'])
-                total_assets_history['assets'] = TRADING_CONFIG['initial_capital'] + pnls['pnl'].cumsum()
+                total_assets_history['date'] = pd.to_datetime(pnls['交易时间'])
+                total_assets_history['assets'] = TRADING_CONFIG['initial_capital'] + pnls['total_pnl'].cumsum()
             evaluator = PerformanceEvaluator(pnls, total_assets_history)
-            annualized_return, _, _ = evaluator.calculate_metrics()
+            annualized_return, *_ = evaluator.calculate_metrics()
             if annualized_return > best_annualized_return:
                 best_annualized_return = annualized_return
                 best_params = {'lookback_period': lookback_period, 'top_n': top_n}
@@ -58,8 +58,8 @@ def optimize_parameters(strategy_name, market_data):
             pnls = calculator.calculate_pnl()
             total_assets_history = pd.DataFrame()
             if not pnls.empty:
-                total_assets_history['date'] = pd.to_datetime(pnls['date'])
-                total_assets_history['assets'] = TRADING_CONFIG['initial_capital'] + pnls['pnl'].cumsum()
+                total_assets_history['date'] = pd.to_datetime(pnls['交易时间'])
+                total_assets_history['assets'] = TRADING_CONFIG['initial_capital'] + pnls['total_pnl'].cumsum()
             evaluator = PerformanceEvaluator(pnls, total_assets_history)
             annualized_return, _, _ = evaluator.calculate_metrics()
             if annualized_return > best_annualized_return:
@@ -80,8 +80,8 @@ def optimize_parameters(strategy_name, market_data):
             pnls = calculator.calculate_pnl()
             total_assets_history = pd.DataFrame()
             if not pnls.empty:
-                total_assets_history['date'] = pd.to_datetime(pnls['date'])
-                total_assets_history['assets'] = TRADING_CONFIG['initial_capital'] + pnls['pnl'].cumsum()
+                total_assets_history['date'] = pd.to_datetime(pnls['交易时间'])
+                total_assets_history['assets'] = TRADING_CONFIG['initial_capital'] + pnls['total_pnl'].cumsum()
             evaluator = PerformanceEvaluator(pnls, total_assets_history)
             annualized_return, _, _ = evaluator.calculate_metrics()
             if annualized_return > best_annualized_return:
@@ -127,18 +127,19 @@ def main(strategy_name='momentum', optimize=False):
     
     total_assets_history = pd.DataFrame()
     if not pnls.empty:
-        total_assets_history['date'] = pd.to_datetime(pnls['date'])
+        total_assets_history['date'] = pd.to_datetime(pnls['交易时间'])
         # 确保初始资产等于初始资本
         initial_assets = TRADING_CONFIG['initial_capital']
-        total_assets_history['assets'] = initial_assets + pnls['pnl'].cumsum().shift(1).fillna(0)
+        total_assets_history['assets'] = initial_assets + pnls['total_pnl'].cumsum().shift(1).fillna(0)
         # 修正第一条记录的资产值为初始资本
         if not total_assets_history.empty:
             total_assets_history.loc[0, 'assets'] = initial_assets
     evaluator = PerformanceEvaluator(pnls, total_assets_history)
-    annualized_return, sharpe, max_drawdown = evaluator.calculate_metrics()
+    annualized_return, sharpe, vol_ann, mdd_info = evaluator.calculate_metrics()
+    max_drawdown = mdd_info.ratio
     evaluator.plot_assets_curve()
     evaluator.plot_pnl_per_trade()
-    evaluator.plot_performance_metrics(annualized_return, sharpe, max_drawdown)
+    evaluator.plot_performance_metrics()
     
     detailed_report = evaluator.generate_detailed_report()
     with open('detailed_report.txt', 'w', encoding='utf-8') as f:
@@ -153,8 +154,8 @@ def main(strategy_name='momentum', optimize=False):
         if not pnls.empty:
             f.write('\n每次交易的PNL:\n')
             for _, row in pnls.iterrows():
-                date_str = row['date'].strftime('%Y%m%d') if isinstance(row['date'], pd.Timestamp) else str(row['date'])
-                f.write(f"日期: {date_str}, PNL: {row['pnl']:.2f}, 手续费: {row['fee']:.2f}\n")
+                date_str = row['交易时间'].strftime('%Y%m%d') if isinstance(row['交易时间'], pd.Timestamp) else str(row['交易时间'])
+                f.write(f"日期: {date_str}, PNL: {row['total_pnl']:.2f}, 手续费: {row['fee']:.2f}\n")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Q-T_lib Trading System')
